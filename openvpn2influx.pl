@@ -10,6 +10,10 @@ my $debug = $ENV{DEBUG} || 0;
 while(1) { ## white forever
 
 my $in = 0;
+my $active = 0;
+my @influx;
+my $t = int( Time::HiRes::time() * 1_000_000_000 );
+
 
 open(my $s, '<', '/var/log/openvpn-ffzg-general-ldap-status.log');
 while(<$s>) {
@@ -33,17 +37,19 @@ while(<$s>) {
 
 	#warn "# $in [$_]\n";
 
-	my $t = int( Time::HiRes::time() * 1_000_000_000 );
-
 	if ( $in == 1 ) {
 		my ( $user, $real_addr, $recv, $send, $since ) = split(/,/);
-		my $influx = qq{openvpn_transfer,user=$user real_addr="$real_addr",recv=${recv}i,send=${send}i $t};
-		print "$influx\n" if $debug;
-		system "curl --silent -XPOST '$influx_url' --data-binary '$influx'"
+		push @influx, qq{openvpn_transfer,user=$user real_addr="$real_addr",recv=${recv}i,send=${send}i $t};
+		$active++;
 	}
 
 };
 close($s);
+
+push @influx, qq{openvpn_users active=${active}i $t};
+my $influx = join("\n", @influx);
+print "$influx\n" if $debug;
+system "curl --silent -XPOST '$influx_url' --data-binary '$influx'";
 
 sleep 10;
 
