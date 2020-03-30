@@ -2,8 +2,10 @@
 use warnings;
 use strict;
 use Time::HiRes;
+use autodie;
 
 my $influx_url = shift @ARGV || 'http://influx.ffzg.hr:8086/write?consistency=any&db=telegraf';
+my $debug = $ENV{DEBUG} || 0;
 
 while(1) { ## white forever
 
@@ -36,7 +38,7 @@ while(<$s>) {
 	if ( $in == 1 ) {
 		my ( $user, $real_addr, $recv, $send, $since ) = split(/,/);
 		my $influx = qq{openvpn_transfer,user=$user real_addr="$real_addr",recv=${recv}i,send=${send}i $t};
-		print "$influx\n";
+		print "$influx\n" if $debug;
 		system "curl --silent -XPOST '$influx_url' --data-binary '$influx'"
 	}
 
