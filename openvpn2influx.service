@@ -1,0 +1,10 @@
+[Unit]
+Description=OpenVPN to Influx
+
+[Service]
+User=root
+ExecStart=/srv/openvpn-tools/openvpn2influx.pl
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
