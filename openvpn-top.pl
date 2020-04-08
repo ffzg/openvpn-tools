@@ -43,6 +43,7 @@ while( <$sock> ) {
 		}
 	} elsif ( $#v == 3 ) {
 		$status->{ $v[1] }->{ip} = $v[0];
+		$status->{ $v[1] }->{last_ref} = $v[3];
 	}
 
 }
@@ -53,9 +54,9 @@ close($sock);
 
 warn "# status = ",dump($status) if $debug;
 
-my @cols = qw( client ip recv sent since );
+my @cols = qw( client ip recv sent since last_ref);
 
 foreach my $login ( sort keys %$status ) {
 	my $u = $status->{$login};
-	printf("%-10s %-20s %-10s %10s %10s %s\n", $login, map { $u->{$_} } @cols);
+	printf("%-10s %-20s %-10s %10s %10s %s - %s\n", $login, map { $u->{$_} } @cols);
 }
