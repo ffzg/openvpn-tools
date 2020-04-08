@@ -12,7 +12,8 @@ while(1) { ## white forever
 my $in = 0;
 my $active = 0;
 my @influx;
-my $t = int( Time::HiRes::time() * 1_000_000_000 );
+my $t1 = Time::HiRes::time();
+my $t = int( $t1 * 1_000_000_000 );
 
 
 open(my $s, '<', '/var/log/openvpn-ffzg-general-ldap-status.log');
@@ -51,7 +52,8 @@ my $influx = join("\n", @influx);
 print "$influx\n" if $debug;
 system "curl --silent -XPOST '$influx_url' --data-binary '$influx'";
 
-sleep 10;
+
+Time::HiRes::sleep( 10 - ( Time::HiRes::time() - $t1 ) );
 
 } ## while forever
 
